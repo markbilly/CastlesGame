@@ -1,0 +1,13 @@
+﻿body {
+    font-family: 'Segoe UI', sans-serif;
+}
+
+span {
+    font-style: italic;
+}
+
+canvas {
+    left: 0px;
+    top: 0px;
+    position: absolute;
+}
