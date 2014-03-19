@@ -18,6 +18,7 @@
 
         // World stuff
         game.InitWorld();
+        game.RefreshWorld();
         game.DrawWorld();
     }, 1000);
 };

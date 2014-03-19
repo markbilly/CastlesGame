@@ -1,10 +1,10 @@
-﻿function World(backgroundCanvasContext, foregroundCanvasContext) {
+﻿function World() {
     // Member variables
-    this.backgroundCanvasContext = backgroundCanvasContext;
-    this.foregroundCanvasContext = foregroundCanvasContext;
     this.backgroundImage = new Image();
     this.tileGround01 = new Image();
     this.tileGrass00 = new Image();
+    this.tileCastleBlue = new Image();
+    this.tileCastleOrange = new Image();
     this.tileSize = 20;
     this.mapWidthInTiles = 16;
     this.mapHeightInTiles = 9;
@@ -16,6 +16,8 @@ World.prototype.LoadContent = function() {
     this.backgroundImage.src = "Content/blueSkyBackground.png";
     this.tileGround01.src = "Content/ground01.png";
     this.tileGrass00.src = "Content/grass00.png";
+    this.tileCastleBlue.src = "Content/castleBlue.png";
+    this.tileCastleOrange.src = "Content/castleOrange.png";
 };
 
 World.prototype.GenerateTileMap = function() {
@@ -27,24 +29,31 @@ World.prototype.GenerateTileMap = function() {
     for (var i = 0; i < mapLength; i++) {
         this.tileMap[i] = tileValue;
 
+        // Reset to default tile i.e. 0
+        tileValue = 0;
+
+        // Fifth row has castles on
+        if (i == rowLength * 4) tileValue = 3; // Blue castle
+        if (i == rowLength * 5 - 1) tileValue = 4; //Orange castle
+
         // Sixth row is grass i.e. 2
-        if (i == rowLength * 5) {
+        if (i >= rowLength * 5) {
             tileValue = 2;
         }
 
         // Last three rows are ground i.e. 1
-        if (i == rowLength * 6) {
+        if (i >= rowLength * 6) {
             tileValue = 1;
         }
     }
 };
 
 // Draw the world - i.e. tile map, etc
-World.prototype.Draw = function (scale) {
+World.prototype.Draw = function (canvasContext, scale) {
     // Draw the background
     var width = this.mapWidthInTiles * this.tileSize;
     var height = this.mapHeightInTiles * this.tileSize;
-    this.backgroundCanvasContext.drawImage(this.backgroundImage, 0, 0, width * scale, height * scale);
+    canvasContext.drawImage(this.backgroundImage, 0, 0, width * scale, height * scale);
     
     // Draw the tiles
     var x = 0;
@@ -63,10 +72,18 @@ World.prototype.Draw = function (scale) {
                     // grass00 tile
                     tile = this.tileGrass00;
                     break;
+                case 3:
+                    // grass00 tile
+                    tile = this.tileCastleBlue;
+                    break;
+                case 4:
+                    // grass00 tile
+                    tile = this.tileCastleOrange;
+                    break;
                 default:
             }
             // Draw tile image
-            this.backgroundCanvasContext.drawImage(tile, x * scale, y * scale, this.tileSize * scale, this.tileSize * scale);
+            canvasContext.drawImage(tile, x * scale, y * scale, this.tileSize * scale, this.tileSize * scale);
         }
         
         // Increment the indexes for drawing
