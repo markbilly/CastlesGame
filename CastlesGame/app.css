@@ -1,5 +1,12 @@
 ﻿body {
-    font-family: 'Segoe UI', sans-serif;
+    font-family: 'pixel', sans-serif;
+}
+
+@font-face {
+    font-family: 'pixel';
+    src: url('PressStart2P.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
 }
 
 span {
@@ -7,7 +14,7 @@ span {
 }
 
 canvas {
-    left: 0px;
-    top: 0px;
+    left: 0;
+    top: 0;
     position: absolute;
 }

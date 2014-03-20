@@ -19,17 +19,26 @@
   <ItemGroup>
     <Content Include="app.css" />
     <Content Include="Content\blueSkyBackground.png" />
+    <Content Include="Content\cursor.png" />
+    <Content Include="Content\cursorFocused.png" />
     <Content Include="Content\grass00.png" />
     <Content Include="Content\ground01.png" />
+    <Content Include="Content\iconBuild.png" />
+    <Content Include="Content\iconDig.png" />
+    <Content Include="Content\iconDigAcross.png" />
+    <Content Include="Content\iconDigDown.png" />
+    <Content Include="Content\iconWarrior.png" />
     <Content Include="Content\man01.png" />
     <Content Include="Game.js" />
     <Content Include="index.html" />
     <Content Include="Main.js" />
     <Content Include="Unit.js" />
+    <Content Include="UnitMenu.js" />
     <Content Include="web.config" />
     <Content Include="World.js" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="PressStart2P.ttf" />
     <None Include="web.Debug.config">
       <DependentUpon>web.config</DependentUpon>
     </None>

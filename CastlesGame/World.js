@@ -1,6 +1,9 @@
 ﻿function World() {
     // Member variables
     this.backgroundImage = new Image();
+    this.cursorFocusedImage = new Image();
+    this.cursorNormalImage = new Image();
+    this.cursorImage = this.cursorNormalImage;
     this.tileGround01 = new Image();
     this.tileGrass00 = new Image();
     this.tileCastleBlue = new Image();
@@ -8,16 +11,24 @@
     this.tileSize = 20;
     this.mapWidthInTiles = 16;
     this.mapHeightInTiles = 9;
+    this.cursorTileX = 0;
+    this.cursorTileY = 0;
     this.tileMap = [144]; // 16 x 9 tiles where each tile is 20px square
+    this.exampleUnit = new Unit();
 }
 
 World.prototype.LoadContent = function() {
     // Load background image
     this.backgroundImage.src = "Content/blueSkyBackground.png";
+    this.cursorNormalImage.src = "Content/cursor.png";
+    this.cursorFocusedImage.src = "Content/cursorFocused.png";
     this.tileGround01.src = "Content/ground01.png";
     this.tileGrass00.src = "Content/grass00.png";
     this.tileCastleBlue.src = "Content/castleBlue.png";
     this.tileCastleOrange.src = "Content/castleOrange.png";
+
+    // Load unit content
+    this.exampleUnit.LoadContent();
 };
 
 World.prototype.GenerateTileMap = function() {
@@ -48,12 +59,23 @@ World.prototype.GenerateTileMap = function() {
     }
 };
 
+World.prototype.DrawCursor = function (canvasContext, scale) {
+    // Draw
+    var x = this.cursorTileX * this.tileSize * scale;
+    var y = this.cursorTileY * this.tileSize * scale;
+    canvasContext.drawImage(this.cursorImage, x, y, this.tileSize * scale, this.tileSize * scale);
+
+    //// Update debug message
+    //var messageDiv = document.getElementById("Message");
+    //messageDiv.innerHTML = "cursor @: " + x + ", " + y;
+};
+
 // Draw the world - i.e. tile map, etc
-World.prototype.Draw = function (canvasContext, scale) {
+World.prototype.Draw = function (backgroundCanvasContext, foregroundCanvasContext, scale) {
     // Draw the background
     var width = this.mapWidthInTiles * this.tileSize;
     var height = this.mapHeightInTiles * this.tileSize;
-    canvasContext.drawImage(this.backgroundImage, 0, 0, width * scale, height * scale);
+    backgroundCanvasContext.drawImage(this.backgroundImage, 0, 0, width * scale, height * scale);
     
     // Draw the tiles
     var x = 0;
@@ -83,7 +105,7 @@ World.prototype.Draw = function (canvasContext, scale) {
                 default:
             }
             // Draw tile image
-            canvasContext.drawImage(tile, x * scale, y * scale, this.tileSize * scale, this.tileSize * scale);
+            backgroundCanvasContext.drawImage(tile, x * scale, y * scale, this.tileSize * scale, this.tileSize * scale);
         }
         
         // Increment the indexes for drawing
@@ -94,4 +116,10 @@ World.prototype.Draw = function (canvasContext, scale) {
             x = 0;
         }
     }
+    
+    // Draw units
+    this.exampleUnit.Draw(foregroundCanvasContext, scale);
+    
+    // Draw the cursor
+    this.DrawCursor(foregroundCanvasContext, scale);
 }
