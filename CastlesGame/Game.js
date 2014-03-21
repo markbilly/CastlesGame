@@ -12,8 +12,8 @@
 
 Game.prototype.SetSize = function () {
     // Define native game dimensions
-    var width = 320;
-    var height = 180;
+    var width = this.world.mapWidthInTiles * this.world.tileSize;
+    var height = this.world.mapHeightInTiles * this.world.tileSize;
 
     // Find scale factor based on window dimensions
     var windowWidth = window.innerWidth;
@@ -55,8 +55,8 @@ Game.prototype.UpdateHoverPosition = function (hoverX, hoverY) {
     var y = hoverY / this.scale;
 
     // Get x, y tile locations
-    this.world.cursorTileX = Math.floor(x / 20);
-    this.world.cursorTileY = Math.floor(y / 20);
+    this.world.cursorTileX = Math.floor(x / this.world.tileSize);
+    this.world.cursorTileY = Math.floor(y / this.world.tileSize);
     
     // Check which cursor to use
     // Set default cursor
@@ -72,9 +72,9 @@ Game.prototype.UpdateUnitTargets = function (clickX, clickY) {
     // Work out tile number from coords
     var x = clickX / this.scale;
     var y = clickY / this.scale;
-    var tileX = Math.floor(x / 20);
-    var tileY = Math.floor(y / 20);
-    var newTile = (tileX + 16 * tileY) + 1;
+    var tileX = Math.floor(x / this.world.tileSize);
+    var tileY = Math.floor(y / this.world.tileSize);
+    var newTile = (tileX + this.world.mapWidthInTiles * tileY) + 1;
     
     // Update units
     this.world.exampleUnit.targetTile = newTile;
@@ -86,12 +86,14 @@ Game.prototype.ProcessClick = function (clickX, clickY) {
     var y = clickY / this.scale;
     
     // If out of bounds then return
-    if (x > 320 || y > 180) return;
+    var width = this.world.mapWidthInTiles * this.world.tileSize;
+    var height = this.world.mapHeightInTiles * this.world.tileSize;
+    if (x > width || y > height) return;
 
     // Work out tile number from coords
-    var tileX = Math.floor(x / 20);
-    var tileY = Math.floor(y / 20);
-    var newTile = (tileX + 16 * tileY) + 1;
+    var tileX = Math.floor(x / this.world.tileSize);
+    var tileY = Math.floor(y / this.world.tileSize);
+    var newTile = (tileX + this.world.mapWidthInTiles * tileY) + 1;
     
     // Check whether click is on a unit
     if (newTile == this.world.exampleUnit.currentTile) {
