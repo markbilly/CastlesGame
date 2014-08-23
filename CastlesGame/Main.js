@@ -6,6 +6,8 @@ var hoverY = 0;
 var mouseX = 0;
 var mouseY = 0;
 var newClick = false;
+var down = false;
+var event = "";
 
 window.onload = function () {
     // Put up the loading message
@@ -41,11 +43,8 @@ function RefreshLoop(game) {
     
     function loop() {
         // Send new mouse click coords
-        if (newClick) game.ProcessClick(mouseX, mouseY);
-        game.UpdateHoverPosition(hoverX, hoverY);
-
-        // Refresh unit context menu
-        if (game.isMenu) game.unitMenu.Update();
+        if (newClick) game.ProcessClick();
+        game.UpdateHoverPosition(hoverX, hoverY, down);
 
         // Refresh the game world
         game.RefreshWorld();
@@ -80,10 +79,17 @@ function DrawLoop(game) {
 ////////////////
 //   Input    //
 ////////////////
-document.addEventListener("click", function(e) {
+document.addEventListener("mousedown", function(e) {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+    down = true;
+}, true);
+
+document.addEventListener("mouseup", function (e) {
     mouseX = e.clientX;
     mouseY = e.clientY;
     newClick = true;
+    down = false;
 }, true);
 
 document.addEventListener("mousemove", function (e) {

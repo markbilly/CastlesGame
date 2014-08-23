@@ -6,8 +6,8 @@
     this.foregroundCanvasContext = this.foregroundCanvas.getContext("2d");
     this.scale = 1;
     this.world = new World();
-    this.unitMenu = new UnitMenu();
-    this.isMenu = false;
+    this.menu = new Menu();
+    this.mouseDown = false;
 }
 
 Game.prototype.SetSize = function () {
@@ -39,9 +39,7 @@ Game.prototype.SetSize = function () {
 Game.prototype.LoadContent = function () {
     // Load world content
     this.world.LoadContent();
-    
-    // Load menu content
-    this.unitMenu.LoadContent();
+    this.menu.LoadContent();
 };
 
 Game.prototype.InitWorld = function() {
@@ -49,7 +47,7 @@ Game.prototype.InitWorld = function() {
     this.world.GenerateTileMap();
 };
 
-Game.prototype.UpdateHoverPosition = function (hoverX, hoverY) {
+Game.prototype.UpdateHoverPosition = function (hoverX, hoverY, down) {
     // Deal with scale
     var x = hoverX / this.scale;
     var y = hoverY / this.scale;
@@ -57,55 +55,49 @@ Game.prototype.UpdateHoverPosition = function (hoverX, hoverY) {
     // Get x, y tile locations
     this.world.cursorTileX = Math.floor(x / this.world.tileSize);
     this.world.cursorTileY = Math.floor(y / this.world.tileSize);
+
+    this.world.isCursorVisible = true;
+    if (this.world.cursorTileX < 2)
+        this.world.isCursorVisible = false;
     
     // Check which cursor to use
     // Set default cursor
     this.world.cursorImage = this.world.cursorNormalImage;
-    var cursorTile = (this.world.cursorTileX + this.world.mapWidthInTiles * this.world.cursorTileY) + 1;
-    if (cursorTile == this.world.exampleUnit.currentTile) {
-        // Use focused cursor
-        this.world.cursorImage = this.world.cursorFocusedImage;
+    
+    // Fill up the selection
+    if (down) {
+        var tileX = this.world.cursorTileX;
+        var tileY = this.world.cursorTileY;
+        var newTile = (tileX + this.world.mapWidthInTiles * (tileY - 1)) + 1;
+
+        var existsInSelection = false;
+        for (var i = 0; i < this.world.tileSelection.length; i++) {
+            if (this.world.tileSelection[i] == newTile) {
+                existsInSelection = true;
+                break;
+            }
+        }
+        if (!existsInSelection)
+            this.world.tileSelection.push(newTile);
     }
 };
 
-Game.prototype.UpdateUnitTargets = function (clickX, clickY) {
-    // Work out tile number from coords
-    var x = clickX / this.scale;
-    var y = clickY / this.scale;
-    var tileX = Math.floor(x / this.world.tileSize);
-    var tileY = Math.floor(y / this.world.tileSize);
-    var newTile = (tileX + this.world.mapWidthInTiles * tileY) + 1;
-    
-    // Update units
-    this.world.exampleUnit.targetTile = newTile;
+Game.prototype.ProcessClick = function () {
+
+    // Set all tiles in selection to 1
+    for (var i = 0; i < this.world.tileSelection.length; i++) {
+        var location = this.world.tileSelection[i];
+        this.world.tileMap[location] = 1;
+    }
+
+    // Clear tile selection
+    this.world.tileSelection = [];
+
+    // Reset mouseDown
+    this.mouseDown = false;
 };
 
-Game.prototype.ProcessClick = function (clickX, clickY) {
-    // Deal with scale
-    var x = clickX / this.scale;
-    var y = clickY / this.scale;
-    
-    // If out of bounds then return
-    var width = this.world.mapWidthInTiles * this.world.tileSize;
-    var height = this.world.mapHeightInTiles * this.world.tileSize;
-    if (x > width || y > height) return;
-
-    // Work out tile number from coords
-    var tileX = Math.floor(x / this.world.tileSize);
-    var tileY = Math.floor(y / this.world.tileSize);
-    var newTile = (tileX + this.world.mapWidthInTiles * tileY) + 1;
-    
-    // Check whether click is on a unit
-    if (newTile == this.world.exampleUnit.currentTile) {
-        // Open unit menu
-        this.unitMenu.Init(this.world.exampleUnit);
-        this.isMenu = true;
-    } else {
-        // If we click anywhere other than on a unit
-        // Change unit target tile accordingly
-        this.UpdateUnitTargets(clickX, clickY);
-        this.isMenu = false;
-    }
+Game.prototype.ProcessUp = function () {
 };
 
 Game.prototype.RefreshWorld = function() {
@@ -122,9 +114,5 @@ Game.prototype.ClearCanvases = function() {
 Game.prototype.DrawWorld = function () {
     // Draw world onto the game's background canvas
     this.world.Draw(this.backgroundCanvasContext, this.foregroundCanvasContext, this.scale);
-};
-
-Game.prototype.DrawMenu = function () {
-    // Draw
-    this.unitMenu.Draw(this.foregroundCanvasContext, this.scale);
+    this.menu.Draw(this.foregroundCanvasContext, this.scale);
 };

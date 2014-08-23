@@ -13,7 +13,9 @@
     this.mapHeightInTiles = 9;
     this.cursorTileX = 0;
     this.cursorTileY = 0;
+    this.isCursorVisible = true;
     this.tileMap = [144]; // 16 x 9 tiles where each tile is 20px square
+    this.tileSelection = [];
     this.exampleUnit = new Unit();
 }
 
@@ -35,6 +37,8 @@ World.prototype.GenerateTileMap = function() {
     var mapLength = this.mapWidthInTiles * this.mapHeightInTiles;
     var rowLength = this.mapWidthInTiles;
     var tileValue = 0;
+
+    return;
 
     // First five rows are sky i.e. 0
     for (var i = 0; i < mapLength; i++) {
@@ -63,11 +67,9 @@ World.prototype.DrawCursor = function (canvasContext, scale) {
     // Draw
     var x = this.cursorTileX * this.tileSize * scale;
     var y = this.cursorTileY * this.tileSize * scale;
-    canvasContext.drawImage(this.cursorImage, x, y, this.tileSize * scale, this.tileSize * scale);
 
-    //// Update debug message
-    //var messageDiv = document.getElementById("Message");
-    //messageDiv.innerHTML = "cursor @: " + x + ", " + y;
+    if (this.isCursorVisible)
+        canvasContext.drawImage(this.cursorImage, x, y, this.tileSize * scale, this.tileSize * scale);
 };
 
 // Draw the world - i.e. tile map, etc

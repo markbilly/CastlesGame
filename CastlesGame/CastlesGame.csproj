@@ -32,8 +32,8 @@
     <Content Include="Game.js" />
     <Content Include="index.html" />
     <Content Include="Main.js" />
+    <Content Include="Menu.js" />
     <Content Include="Unit.js" />
-    <Content Include="UnitMenu.js" />
     <Content Include="web.config" />
     <Content Include="World.js" />
   </ItemGroup>
