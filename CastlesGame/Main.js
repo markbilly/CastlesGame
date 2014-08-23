@@ -68,9 +68,6 @@ function DrawLoop(game) {
         // Draw the game world
         game.DrawWorld();
 
-        // Draw unit context menu
-        if (game.isMenu) game.DrawMenu();
-
         // Callback itself to loop
         requestAnimationFrame(loop);
     }

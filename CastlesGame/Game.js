@@ -53,41 +53,39 @@ Game.prototype.UpdateHoverPosition = function (hoverX, hoverY, down) {
     var y = hoverY / this.scale;
 
     // Get x, y tile locations
-    this.world.cursorTileX = Math.floor(x / this.world.tileSize);
-    this.world.cursorTileY = Math.floor(y / this.world.tileSize);
-
+    this.world.cursorTile = this.world.PixelPositionToTileIndex(x, y);
     this.world.isCursorVisible = true;
-    if (this.world.cursorTileX < 2)
-        this.world.isCursorVisible = false;
     
     // Check which cursor to use
     // Set default cursor
     this.world.cursorImage = this.world.cursorNormalImage;
-    
+
+    var messageDiv = document.getElementById("Message");
+    messageDiv.innerHTML = "Selected: ";
     // Fill up the selection
     if (down) {
-        var tileX = this.world.cursorTileX;
-        var tileY = this.world.cursorTileY;
-        var newTile = (tileX + this.world.mapWidthInTiles * (tileY - 1)) + 1;
-
         var existsInSelection = false;
         for (var i = 0; i < this.world.tileSelection.length; i++) {
-            if (this.world.tileSelection[i] == newTile) {
+            if (this.world.tileSelection[i] == this.world.cursorTile) {
                 existsInSelection = true;
                 break;
             }
         }
         if (!existsInSelection)
-            this.world.tileSelection.push(newTile);
+            this.world.tileSelection.push(this.world.cursorTile);
     }
 };
 
 Game.prototype.ProcessClick = function () {
+    var messageDiv = document.getElementById("Message");
+    messageDiv.innerHTML = "Selection: ";
 
     // Set all tiles in selection to 1
     for (var i = 0; i < this.world.tileSelection.length; i++) {
         var location = this.world.tileSelection[i];
         this.world.tileMap[location] = 1;
+
+        messageDiv.innerHTML += location + ", ";
     }
 
     // Clear tile selection
@@ -97,12 +95,18 @@ Game.prototype.ProcessClick = function () {
     this.mouseDown = false;
 };
 
-Game.prototype.ProcessUp = function () {
+Game.prototype.Reset = function () {
+    this.world.exampleUnit.Reset();
 };
 
 Game.prototype.RefreshWorld = function() {
     // Update things
-    this.world.exampleUnit.Update();
+    this.world.exampleUnit.Update(this.world.gravity);
+    this.world.ApplyCollisions(this.world.exampleUnit);
+
+    // Check for game over
+    if (this.world.exampleUnit.y > this.world.mapHeightInTiles * this.world.tileSize)
+        this.Reset();
 };
 
 Game.prototype.ClearCanvases = function() {

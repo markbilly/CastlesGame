@@ -11,12 +11,12 @@
     this.tileSize = 20;
     this.mapWidthInTiles = 16;
     this.mapHeightInTiles = 9;
-    this.cursorTileX = 0;
-    this.cursorTileY = 0;
+    this.cursorTile = 0;
     this.isCursorVisible = true;
     this.tileMap = [144]; // 16 x 9 tiles where each tile is 20px square
     this.tileSelection = [];
     this.exampleUnit = new Unit();
+    this.gravity = 10;
 }
 
 World.prototype.LoadContent = function() {
@@ -33,11 +33,45 @@ World.prototype.LoadContent = function() {
     this.exampleUnit.LoadContent();
 };
 
+World.prototype.TileIndexToTilePosition = function (tileIndex) {
+
+    var tileY = Math.floor(tileIndex / this.mapWidthInTiles);
+    var tileX = tileIndex - Math.ceil(tileY * this.mapWidthInTiles);
+
+    return { x: tileX, y: tileY };
+};
+
+World.prototype.TilePositionToTileIndex = function (tileX, tileY) {
+
+    var tile = tileX + tileY * this.mapWidthInTiles;
+    return tile;
+};
+
+World.prototype.TileIndexToPixelPosition = function (tileIndex) {
+
+    var tilePos = this.TileIndexToTilePosition(tileIndex);
+    var yPos = this.tileSize * tilePos.y;
+    var xPos = this.tileSize * tilePos.x;
+
+    return { x: xPos, y: yPos };
+};
+
+World.prototype.PixelPositionToTileIndex = function (pixelX, pixelY) {
+    var tileX = Math.floor(pixelX / this.tileSize);
+    var tileY = Math.floor(pixelY / this.tileSize);
+    var index = tileX + this.mapWidthInTiles * tileY;
+
+    return index;
+};
+
 World.prototype.GenerateTileMap = function() {
     var mapLength = this.mapWidthInTiles * this.mapHeightInTiles;
     var rowLength = this.mapWidthInTiles;
     var tileValue = 0;
 
+    for (var i = 0; i < mapLength; i++) {
+        this.tileMap[i] = 0;
+    }
     return;
 
     // First five rows are sky i.e. 0
@@ -63,10 +97,23 @@ World.prototype.GenerateTileMap = function() {
     }
 };
 
+World.prototype.ApplyCollisions = function (unit) {
+
+    var tile = this.PixelPositionToTileIndex(unit.x, unit.y);
+    var below = this.PixelPositionToTileIndex(unit.x, unit.y + this.tileSize);
+
+    if (this.tileMap[below] > 0) {
+        unit.dy = 0;
+        //unit.x = this.TileIndexToPixelPosition(tile).x;
+        unit.y = this.TileIndexToPixelPosition(tile).y;
+    }
+
+}
+
 World.prototype.DrawCursor = function (canvasContext, scale) {
     // Draw
-    var x = this.cursorTileX * this.tileSize * scale;
-    var y = this.cursorTileY * this.tileSize * scale;
+    var x = this.TileIndexToPixelPosition(this.cursorTile).x * scale;
+    var y = this.TileIndexToPixelPosition(this.cursorTile).y * scale;
 
     if (this.isCursorVisible)
         canvasContext.drawImage(this.cursorImage, x, y, this.tileSize * scale, this.tileSize * scale);
@@ -81,8 +128,16 @@ World.prototype.Draw = function (backgroundCanvasContext, foregroundCanvasContex
     
     // Draw the tiles
     var x = 0;
-    var y = 0;
+    var y = -this.tileSize;
     for (var i = 0; i < this.tileMap.length; i++) {
+        // Increment the indexes for drawing
+        x += this.tileSize;
+        if (i % this.mapWidthInTiles == 0) {
+            y += this.tileSize;
+            // Reset x
+            x = 0;
+        }
+
         // Don't draw anything for 0 tiles
         if (this.tileMap[i] != 0) {
             // Check what type of tile and set image
@@ -108,14 +163,6 @@ World.prototype.Draw = function (backgroundCanvasContext, foregroundCanvasContex
             }
             // Draw tile image
             backgroundCanvasContext.drawImage(tile, x * scale, y * scale, this.tileSize * scale, this.tileSize * scale);
-        }
-        
-        // Increment the indexes for drawing
-        x += this.tileSize;
-        if (i % this.mapWidthInTiles == 0) {
-            y += this.tileSize;
-            // Reset x
-            x = 0;
         }
     }
     
