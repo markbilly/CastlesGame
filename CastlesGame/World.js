@@ -17,6 +17,7 @@
     this.tileSelection = [];
     this.exampleUnit = new Unit();
     this.gravity = 10;
+    this.score = 0;
 }
 
 World.prototype.LoadContent = function() {
@@ -72,6 +73,17 @@ World.prototype.GenerateTileMap = function() {
     for (var i = 0; i < mapLength; i++) {
         this.tileMap[i] = 0;
     }
+
+    function Rand(min, max) {
+        return Math.floor(Math.random() * (max - min + 1) + min);
+    }
+
+    // Randomise where the castle spawns
+    var randX = Rand(5, 15);
+    var randY = Rand(0, 7);
+    this.tileMap[this.TilePositionToTileIndex(randX, randY)] = 3;
+    this.tileMap[this.TilePositionToTileIndex(randX, randY + 1)] = 2;
+
     return;
 
     // First five rows are sky i.e. 0
@@ -97,17 +109,85 @@ World.prototype.GenerateTileMap = function() {
     }
 };
 
+World.prototype.Fail = function () {
+
+    //this.GenerateTileMap();
+    this.exampleUnit.Reset();
+
+};
+
+World.prototype.Success = function () {
+
+    this.GenerateTileMap();
+    this.exampleUnit.Reset();
+    this.score++;
+
+};
+
 World.prototype.ApplyCollisions = function (unit) {
 
-    var tile = this.PixelPositionToTileIndex(unit.x, unit.y);
-    var below = this.PixelPositionToTileIndex(unit.x, unit.y + this.tileSize);
+    var overlapX = unit.x % this.tileSize;
+    var overlapY = unit.y % this.tileSize;
+    var unitTile = this.PixelPositionToTileIndex(unit.x, unit.y);
+    var tile = this.tileMap[this.PixelPositionToTileIndex(unit.x, unit.y)];
+    var down = this.tileMap[this.PixelPositionToTileIndex(unit.x, unit.y + this.tileSize)];
+    var right = this.tileMap[this.PixelPositionToTileIndex(unit.x + this.tileSize, unit.y)];
+    var diag = this.tileMap[this.PixelPositionToTileIndex(unit.x + this.tileSize, unit.y + this.tileSize)];
 
-    if (this.tileMap[below] > 0) {
-        unit.dy = 0;
-        //unit.x = this.TileIndexToPixelPosition(tile).x;
-        unit.y = this.TileIndexToPixelPosition(tile).y;
+    var tile = (tile && tile != 3);
+    var down = (down && down != 3);
+    var right = (right && right != 3);
+    var diag = (diag && diag != 3);
+
+    // Check for success
+    if (this.tileMap[unitTile] == 3) {
+        this.Success();
     }
 
+    // Check for game over
+    if (unit.y > this.mapHeightInTiles * this.tileSize)
+        this.Fail();
+
+    // Vertical
+    if (unit.dy > 0) {
+        if ((down && !tile) ||
+            (diag && !right && overlapX)) {
+            unit.y = this.TileIndexToPixelPosition(unitTile).y;
+            unit.dy = 0;
+            unit.falling = false;
+            unit.jumping = false;
+            overlapY = 0;
+        }
+    }
+    else if (unit.dy < 0) {
+        if ((tile && !down) ||
+            (right && !diag && overlapX)) {
+            unit.y = this.TileIndexToPixelPosition(unitTile).y + this.tileSize;
+            unit.dy = 0;
+            tile = down;
+            right = diag;
+            overlapY = 0;
+        }
+    }
+
+    // Horizontal
+    if (unit.dx > 0) {
+        if ((right && !tile) ||
+            (diag && !down && overlapY)) {
+            unit.x = this.TileIndexToPixelPosition(unitTile).x;
+            unit.dx = unit.dx * -1;
+        }
+    }
+    else if (unit.dx < 0) {
+        if ((tile && !right) ||
+            (down && !diag && overlapY)) {
+            unit.x = this.TileIndexToPixelPosition(unitTile).x + this.tileSize;
+            unit.dx = unit.dx * -1;
+        }
+    }
+
+    // Jumping and falling
+    unit.falling = !(down || (overlapX && diag));
 }
 
 World.prototype.DrawCursor = function (canvasContext, scale) {

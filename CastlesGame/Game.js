@@ -8,6 +8,7 @@
     this.world = new World();
     this.menu = new Menu();
     this.mouseDown = false;
+    this.currentTileType = 2;
 }
 
 Game.prototype.SetSize = function () {
@@ -54,14 +55,13 @@ Game.prototype.UpdateHoverPosition = function (hoverX, hoverY, down) {
 
     // Get x, y tile locations
     this.world.cursorTile = this.world.PixelPositionToTileIndex(x, y);
+    var unitTile = this.world.PixelPositionToTileIndex(this.world.exampleUnit.x, this.world.exampleUnit.y);
     this.world.isCursorVisible = true;
     
     // Check which cursor to use
     // Set default cursor
     this.world.cursorImage = this.world.cursorNormalImage;
 
-    var messageDiv = document.getElementById("Message");
-    messageDiv.innerHTML = "Selected: ";
     // Fill up the selection
     if (down) {
         var existsInSelection = false;
@@ -71,21 +71,20 @@ Game.prototype.UpdateHoverPosition = function (hoverX, hoverY, down) {
                 break;
             }
         }
-        if (!existsInSelection)
+        if (!existsInSelection &&
+            this.world.cursorTile != unitTile &&
+            this.world.tileMap[this.world.cursorTile] != 3) {
             this.world.tileSelection.push(this.world.cursorTile);
+        }
     }
 };
 
 Game.prototype.ProcessClick = function () {
-    var messageDiv = document.getElementById("Message");
-    messageDiv.innerHTML = "Selection: ";
 
     // Set all tiles in selection to 1
     for (var i = 0; i < this.world.tileSelection.length; i++) {
         var location = this.world.tileSelection[i];
-        this.world.tileMap[location] = 1;
-
-        messageDiv.innerHTML += location + ", ";
+        this.world.tileMap[location] = this.currentTileType;
     }
 
     // Clear tile selection
@@ -95,18 +94,10 @@ Game.prototype.ProcessClick = function () {
     this.mouseDown = false;
 };
 
-Game.prototype.Reset = function () {
-    this.world.exampleUnit.Reset();
-};
-
 Game.prototype.RefreshWorld = function() {
     // Update things
     this.world.exampleUnit.Update(this.world.gravity);
     this.world.ApplyCollisions(this.world.exampleUnit);
-
-    // Check for game over
-    if (this.world.exampleUnit.y > this.world.mapHeightInTiles * this.world.tileSize)
-        this.Reset();
 };
 
 Game.prototype.ClearCanvases = function() {
@@ -119,4 +110,9 @@ Game.prototype.DrawWorld = function () {
     // Draw world onto the game's background canvas
     this.world.Draw(this.backgroundCanvasContext, this.foregroundCanvasContext, this.scale);
     this.menu.Draw(this.foregroundCanvasContext, this.scale);
+
+    // Draw score
+    this.foregroundCanvasContext.font = 8 * this.scale + "px pixel";
+    this.foregroundCanvasContext.fillStyle = "#FFF";
+    this.foregroundCanvasContext.fillText(this.world.score, this.world.tileSize * 0.75 * this.scale, this.world.tileSize * this.scale);
 };

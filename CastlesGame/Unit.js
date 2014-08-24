@@ -14,6 +14,7 @@
     this.width = 20;
     this.height = 20;
     this.visible = true;
+    this.falling = false;
 }
 
 Unit.prototype.LoadContent = function() {
@@ -23,6 +24,8 @@ Unit.prototype.LoadContent = function() {
 Unit.prototype.Reset = function () {
     this.x = this.startX;
     this.y = this.startY;
+    //this.dx = 0;
+    this.dy = 0;
 };
 
 Unit.prototype.Update = function (gravity) {
@@ -49,8 +52,8 @@ Unit.prototype.Update = function (gravity) {
     }
 
     this.y = Math.floor(this.y + this.dy);
-    this.x = Math.floor(this.x + this.dx);
-    this.dx = Math.floor(this.dx + this.ddx);
+    if (!this.falling) this.x = Math.floor(this.x + this.dx);
+    if (!this.falling) this.dx = Math.floor(this.dx + this.ddx);
     this.dy = Math.floor(this.dy + this.ddy);
 };
 
