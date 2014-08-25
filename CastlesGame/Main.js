@@ -12,7 +12,7 @@ var event = "";
 window.onload = function () {
     // Put up the loading message
     var messageDiv = document.getElementById("Message");
-    messageDiv.innerHTML = "Loading...";
+    //messageDiv.innerHTML = "Loading...";
 
     // Create an instance of the game
     var game = new Game();
@@ -22,7 +22,7 @@ window.onload = function () {
 
     window.setTimeout(function() {
         // Remove loading message
-        messageDiv.innerHTML = "Loaded";
+        //messageDiv.innerHTML = "Loaded";
 
         // Set the size of the game
         game.SetSize();

@@ -55,12 +55,14 @@ Game.prototype.UpdateHoverPosition = function (hoverX, hoverY, down) {
 
     // Get x, y tile locations
     this.world.cursorTile = this.world.PixelPositionToTileIndex(x, y);
+    var cursorTileX = this.world.TileIndexToTilePosition(this.world.cursorTile).x;
     var unitTile = this.world.PixelPositionToTileIndex(this.world.exampleUnit.x, this.world.exampleUnit.y);
-    this.world.isCursorVisible = true;
     
     // Check which cursor to use
     // Set default cursor
     this.world.cursorImage = this.world.cursorNormalImage;
+    this.world.isCursorVisible = true;
+    if (cursorTileX < 2) this.world.isCursorVisible = false;
 
     // Fill up the selection
     if (down) {
@@ -73,8 +75,19 @@ Game.prototype.UpdateHoverPosition = function (hoverX, hoverY, down) {
         }
         if (!existsInSelection &&
             this.world.cursorTile != unitTile &&
-            this.world.tileMap[this.world.cursorTile] != 3) {
+            this.world.tileMap[this.world.cursorTile] != 3 &&
+            this.world.isCursorVisible) {
             this.world.tileSelection.push(this.world.cursorTile);
+        }
+
+        // If we are over the menu then change tile type
+        if (x > 9 && x < 31) {
+            // Option 1
+            if (y > 39 && y < 61) this.currentTileType = 2;
+            // Option 2
+            if (y > 79 && y < 101) this.currentTileType = 1;
+            // Option 3
+            if (y > 119 && y < 141) this.currentTileType = 0;
         }
     }
 };
@@ -109,7 +122,7 @@ Game.prototype.ClearCanvases = function() {
 Game.prototype.DrawWorld = function () {
     // Draw world onto the game's background canvas
     this.world.Draw(this.backgroundCanvasContext, this.foregroundCanvasContext, this.scale);
-    this.menu.Draw(this.foregroundCanvasContext, this.scale);
+    this.menu.Draw(this.foregroundCanvasContext, this.scale, this.currentTileType);
 
     // Draw score
     this.foregroundCanvasContext.font = 8 * this.scale + "px pixel";
