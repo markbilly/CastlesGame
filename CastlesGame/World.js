@@ -199,6 +199,25 @@ World.prototype.DrawCursor = function (canvasContext, scale) {
         canvasContext.drawImage(this.cursorImage, x, y, this.tileSize * scale, this.tileSize * scale);
 };
 
+World.prototype.DrawSelection = function (canvasContext, scale, tileType) {
+
+    for (var i = 0; i < this.tileSelection.length; i++) {
+        // Get image to draw
+        var img = this.tileGround01;
+        if (tileType == 2) img = this.tileGrass00;
+
+        // Get x and y
+        var x = this.TileIndexToPixelPosition(this.tileSelection[i]).x;
+        var y = this.TileIndexToPixelPosition(this.tileSelection[i]).y;
+
+        // Draw tile image
+        canvasContext.globalAlpha = 0.5;
+        canvasContext.drawImage(img, x * scale, y * scale, this.tileSize * scale, this.tileSize * scale);
+        canvasContext.globalAlpha = 1.0;
+    }
+
+};
+
 // Draw the world - i.e. tile map, etc
 World.prototype.Draw = function (backgroundCanvasContext, foregroundCanvasContext, scale) {
     // Draw the background

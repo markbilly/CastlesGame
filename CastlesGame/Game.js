@@ -123,6 +123,7 @@ Game.prototype.DrawWorld = function () {
     // Draw world onto the game's background canvas
     this.world.Draw(this.backgroundCanvasContext, this.foregroundCanvasContext, this.scale);
     this.menu.Draw(this.foregroundCanvasContext, this.scale, this.currentTileType);
+    this.world.DrawSelection(this.foregroundCanvasContext, this.scale, this.currentTileType);
 
     // Draw score
     this.foregroundCanvasContext.font = 8 * this.scale + "px pixel";
