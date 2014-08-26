@@ -8,6 +8,7 @@
     this.tileGrass00 = new Image();
     this.tileCastleBlue = new Image();
     this.tileCastleOrange = new Image();
+    this.tileDestroy = new Image();
     this.tileSize = 20;
     this.mapWidthInTiles = 16;
     this.mapHeightInTiles = 9;
@@ -18,6 +19,8 @@
     this.exampleUnit = new Unit();
     this.gravity = 10;
     this.score = 0;
+    //this.explosion = new Effect(100, 100, 20, 20, 8, "Content/destroyAnim.png");
+    this.effects = [];
 }
 
 World.prototype.LoadContent = function() {
@@ -29,6 +32,7 @@ World.prototype.LoadContent = function() {
     this.tileGrass00.src = "Content/grass00.png";
     this.tileCastleBlue.src = "Content/castleBlue.png";
     this.tileCastleOrange.src = "Content/castleOrange.png";
+    this.tileDestroy.src = "Content/destroy.png";
 
     // Load unit content
     this.exampleUnit.LoadContent();
@@ -205,6 +209,7 @@ World.prototype.DrawSelection = function (canvasContext, scale, tileType) {
         // Get image to draw
         var img = this.tileGround01;
         if (tileType == 2) img = this.tileGrass00;
+        if (tileType == 0) img = this.tileDestroy;
 
         // Get x and y
         var x = this.TileIndexToPixelPosition(this.tileSelection[i]).x;

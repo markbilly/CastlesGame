@@ -29,6 +29,7 @@
     <Content Include="Content\iconDigDown.png" />
     <Content Include="Content\iconWarrior.png" />
     <Content Include="Content\man01.png" />
+    <Content Include="Effect.js" />
     <Content Include="Game.js" />
     <Content Include="index.html" />
     <Content Include="Main.js" />

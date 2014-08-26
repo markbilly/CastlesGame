@@ -98,6 +98,14 @@ Game.prototype.ProcessClick = function () {
     for (var i = 0; i < this.world.tileSelection.length; i++) {
         var location = this.world.tileSelection[i];
         this.world.tileMap[location] = this.currentTileType;
+        var x = this.world.TileIndexToPixelPosition(this.world.tileSelection[i]).x;
+        var y = this.world.TileIndexToPixelPosition(this.world.tileSelection[i]).y;
+        var src = "Content/poofAnim.png";
+        if (this.currentTileType == 0) src = "Content/destroyAnim.png";
+        this.world.effects.push
+            (
+            new Effect(x, y, this.world.tileSize, this.world.tileSize, 8, src)
+            );
     }
 
     // Clear tile selection
@@ -111,6 +119,10 @@ Game.prototype.RefreshWorld = function() {
     // Update things
     this.world.exampleUnit.Update(this.world.gravity);
     this.world.ApplyCollisions(this.world.exampleUnit);
+
+    for (var i = 0; i < this.world.effects.length; i++) {
+        this.world.effects[i].NextFrame();
+    }
 };
 
 Game.prototype.ClearCanvases = function() {
@@ -124,6 +136,10 @@ Game.prototype.DrawWorld = function () {
     this.world.Draw(this.backgroundCanvasContext, this.foregroundCanvasContext, this.scale);
     this.menu.Draw(this.foregroundCanvasContext, this.scale, this.currentTileType);
     this.world.DrawSelection(this.foregroundCanvasContext, this.scale, this.currentTileType);
+
+    for (var i = 0; i < this.world.effects.length; i++) {
+        this.world.effects[i].Draw(this.foregroundCanvasContext, this.scale);
+    }
 
     // Draw score
     this.foregroundCanvasContext.font = 8 * this.scale + "px pixel";
