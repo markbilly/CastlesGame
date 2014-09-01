@@ -33,6 +33,6 @@ Menu.prototype.Draw = function (canvasContext, scale, tile) {
 
     canvasContext.drawImage(this.img, this.x * scale, this.y * scale, this.width * scale, this.height * scale);
     canvasContext.drawImage(grassImg, 10 * scale, 40 * scale, 20 * scale, 20 * scale);
-    canvasContext.drawImage(groundImg, 10 * scale, 80 * scale, 20 * scale, 20 * scale);
+    //canvasContext.drawImage(groundImg, 10 * scale, 80 * scale, 20 * scale, 20 * scale);
     canvasContext.drawImage(destroyImg, 10 * scale, 120 * scale, 20 * scale, 20 * scale);
 };

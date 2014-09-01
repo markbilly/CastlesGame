@@ -48,52 +48,40 @@ Game.prototype.InitWorld = function() {
     this.world.GenerateTileMap();
 };
 
-Game.prototype.UpdateHoverPosition = function (hoverX, hoverY, down) {
+Game.prototype.TouchStart = function (touchX, touchY) {
     // Deal with scale
     var x = hoverX / this.scale;
     var y = hoverY / this.scale;
 
-    // Get x, y tile locations
-    this.world.cursorTile = this.world.PixelPositionToTileIndex(x, y);
-    var cursorTileX = this.world.TileIndexToTilePosition(this.world.cursorTile).x;
+    // Get tile locations
     var unitTile = this.world.PixelPositionToTileIndex(this.world.exampleUnit.x, this.world.exampleUnit.y);
-    
-    // Check which cursor to use
-    // Set default cursor
-    this.world.cursorImage = this.world.cursorNormalImage;
-    this.world.isCursorVisible = true;
-    if (cursorTileX < 2) this.world.isCursorVisible = false;
 
-    // Fill up the selection
-    if (down) {
-        var existsInSelection = false;
-        for (var i = 0; i < this.world.tileSelection.length; i++) {
-            if (this.world.tileSelection[i] == this.world.cursorTile) {
-                existsInSelection = true;
-                break;
-            }
+    var existsInSelection = false;
+    for (var i = 0; i < this.world.tileSelection.length; i++) {
+        if (this.world.tileSelection[i] == this.world.cursorTile) {
+            existsInSelection = true;
+            break;
         }
-        if (!existsInSelection &&
-            this.world.cursorTile != unitTile &&
-            this.world.tileMap[this.world.cursorTile] != 3 &&
-            this.world.isCursorVisible) {
-            this.world.tileSelection.push(this.world.cursorTile);
-        }
+    }
+    if (!existsInSelection &&
+        this.world.cursorTile != unitTile &&
+        this.world.tileMap[this.world.cursorTile] != 3 &&
+        this.world.isCursorVisible) {
+        this.world.tileSelection.push(this.world.cursorTile);
+    }
 
-        // If we are over the menu then change tile type
-        if (x > 9 && x < 31) {
-            // Option 1
-            if (y > 39 && y < 61) this.currentTileType = 2;
-            // Option 2
-            if (y > 79 && y < 101) this.currentTileType = 1;
-            // Option 3
-            if (y > 119 && y < 141) this.currentTileType = 0;
-        }
+    // If we are over the menu then change tile type
+    if (x > 9 && x < 31) {
+        // Option 1
+        if (y > 39 && y < 61) this.currentTileType = 2;
+        // Option 2
+        //if (y > 79 && y < 101) this.currentTileType = 1;
+        // Option 3
+        if (y > 119 && y < 141) this.currentTileType = 0;
     }
 };
 
-Game.prototype.ProcessClick = function () {
-
+Game.prototype.TouchEnd = function () {
     // Set all tiles in selection to 1
     for (var i = 0; i < this.world.tileSelection.length; i++) {
         var location = this.world.tileSelection[i];
@@ -115,13 +103,36 @@ Game.prototype.ProcessClick = function () {
     this.mouseDown = false;
 };
 
+Game.prototype.UpdateHoverPosition = function (hoverX, hoverY) {
+    // Deal with scale
+    var x = hoverX / this.scale;
+    var y = hoverY / this.scale;
+
+    // Get x, y tile locations
+    this.world.cursorTile = this.world.PixelPositionToTileIndex(x, y);
+    var cursorTileX = this.world.TileIndexToTilePosition(this.world.cursorTile).x;
+    
+    // Check which cursor to use
+    // Set default cursor
+    this.world.cursorImage = this.world.cursorNormalImage;
+    this.world.isCursorVisible = true;
+    if (cursorTileX < 2) this.world.isCursorVisible = false;
+};
+
+Game.prototype.ProcessClick = function () {
+};
+
 Game.prototype.RefreshWorld = function() {
     // Update things
     this.world.exampleUnit.Update(this.world.gravity);
     this.world.ApplyCollisions(this.world.exampleUnit);
+    this.world.TidyTileMap();
 
     for (var i = 0; i < this.world.effects.length; i++) {
-        this.world.effects[i].NextFrame();
+        if (this.world.effects[i].active)
+            this.world.effects[i].NextFrame();
+        else
+            this.world.effects.splice(i, 1);
     }
 };
 

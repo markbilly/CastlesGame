@@ -113,6 +113,21 @@ World.prototype.GenerateTileMap = function() {
     }
 };
 
+World.prototype.TidyTileMap = function () {
+
+    // Don't check the first row
+    for (var i = this.mapWidthInTiles; i < this.tileMap.length; i++) {
+        if (this.tileMap[i] != 2) continue;
+        
+        var currentTile = this.TileIndexToTilePosition(i);
+        var above = this.TilePositionToTileIndex(currentTile.x, currentTile.y - 1);
+        var aboveVal = this.tileMap[above];
+
+        if (aboveVal == 2 || aboveVal == 1) this.tileMap[i] = 1;
+    }
+
+};
+
 World.prototype.Fail = function () {
 
     //this.GenerateTileMap();

@@ -7,7 +7,9 @@ var mouseX = 0;
 var mouseY = 0;
 var newClick = false;
 var down = false;
-var event = "";
+var touch = false;
+var eventStart = "mousedown";
+var eventEnd = "mouseup";
 
 window.onload = function () {
     // Put up the loading message
@@ -43,8 +45,10 @@ function RefreshLoop(game) {
     
     function loop() {
         // Send new mouse click coords
-        if (newClick) game.ProcessClick();
-        game.UpdateHoverPosition(hoverX, hoverY, down);
+        //if (newClick) game.ProcessClick();
+        if (down) game.TouchStart(mouseX, mouseY);
+        else game.TouchEnd();
+        game.UpdateHoverPosition(hoverX, hoverY);
 
         // Refresh the game world
         game.RefreshWorld();
@@ -76,13 +80,25 @@ function DrawLoop(game) {
 ////////////////
 //   Input    //
 ////////////////
-document.addEventListener("mousedown", function(e) {
-    mouseX = e.clientX;
-    mouseY = e.clientY;
+if ("ontouchstart" in document) {
+    eventEnd = "touchend";
+    eventStart = "touchstart";
+    touch = true;
+}
+
+document.addEventListener(eventStart, function (e) {
+    if (touch) {
+        mouseX = e.changedTouches[0].pageX;
+        mouseY = e.changedTouches[0].pageY;
+    }
+    else {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+    }
     down = true;
 }, true);
 
-document.addEventListener("mouseup", function (e) {
+document.addEventListener(eventEnd, function (e) {
     mouseX = e.clientX;
     mouseY = e.clientY;
     newClick = true;
