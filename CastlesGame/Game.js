@@ -66,6 +66,7 @@ Game.prototype.TouchStart = function (touchX, touchY) {
     if (!existsInSelection &&
         this.world.cursorTile != unitTile &&
         this.world.tileMap[this.world.cursorTile] != 3 &&
+        this.world.tileMap[this.world.cursorTile] != 4 &&
         this.world.isCursorVisible) {
         this.world.tileSelection.push(this.world.cursorTile);
     }

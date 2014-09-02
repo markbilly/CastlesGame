@@ -85,22 +85,30 @@ World.prototype.GenerateTileMap = function() {
     }
 
     // Randomise where the castle spawns
-    var randX = Rand(5, 15);
-    var randY = Rand(0, 7);
-    this.tileMap[this.TilePositionToTileIndex(randX, randY)] = 3;
-    this.tileMap[this.TilePositionToTileIndex(randX, randY + 1)] = 2;
+    var castleX = Rand(5, 15);
+    var castleY = Rand(0, 7);
+    this.tileMap[this.TilePositionToTileIndex(castleX, castleY)] = 3;
+    this.tileMap[this.TilePositionToTileIndex(castleX, castleY + 1)] = 2;
 
     // Harder levels
     if (this.score > 9) {
         // Spike on same row as castle - to left of it
-        randX = Rand(2, randX);
-        this.tileMap[this.TilePositionToTileIndex(randX, randY + 1)] = 4;
+        var castleSpikeX = Rand(2, castleX - 1);
+        var castleSpikeY = randY + 1;
+        this.tileMap[this.TilePositionToTileIndex(castleSpikeX, castleSpikeY)] = 4;
     }
     if (this.score > 4) {
         for (var count = 0; count < 2; count++) {
             // Random spikes
-            randX = Rand(2, 15);
-            randY = Rand(0, 8);
+            var randX = 0;
+            var randY = Rand(1, 8);
+            var valid = false;
+            while (!valid) {
+                randX = Rand(2, 15);
+                if (randX != castleX ||
+                    randY != castleY + 1)
+                    valid = true;
+            }
             this.tileMap[this.TilePositionToTileIndex(randX, randY)] = 4;
         }
     }
@@ -110,13 +118,14 @@ World.prototype.TidyTileMap = function () {
 
     // Don't check the first row
     for (var i = this.mapWidthInTiles; i < this.tileMap.length; i++) {
-        if (this.tileMap[i] != 2) continue;
+        if (this.tileMap[i] != 2 && this.tileMap[i] != 1) continue;
         
         var currentTile = this.TileIndexToTilePosition(i);
         var above = this.TilePositionToTileIndex(currentTile.x, currentTile.y - 1);
         var aboveVal = this.tileMap[above];
 
         if (aboveVal == 2 || aboveVal == 1) this.tileMap[i] = 1;
+        if (aboveVal == 0) this.tileMap[i] = 2;
     }
 
 };
@@ -147,10 +156,10 @@ World.prototype.ApplyCollisions = function (unit) {
     var diag = this.tileMap[this.PixelPositionToTileIndex(unit.x + this.tileSize, unit.y + this.tileSize)];
 
     var spike = down == 4;
-    var tile = (tile && tile != 3);
-    var down = (down && down != 3);
-    var right = (right && right != 3);
-    var diag = (diag && diag != 3);
+    var tile = (tile && tile != 3 && tile != 4);
+    var down = (down && down != 3 && down != 4);
+    var right = (right && right != 3 && right != 4);
+    var diag = (diag && diag != 3 && diag != 4);
 
     // Check for success
     if (this.tileMap[unitTile] == 3) {
