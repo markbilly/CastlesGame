@@ -9,6 +9,7 @@
     this.tileCastleBlue = new Image();
     this.tileCastleOrange = new Image();
     this.tileDestroy = new Image();
+    this.tileSpikes = new Image();
     this.tileSize = 20;
     this.mapWidthInTiles = 16;
     this.mapHeightInTiles = 9;
@@ -18,7 +19,7 @@
     this.tileSelection = [];
     this.exampleUnit = new Unit();
     this.gravity = 10;
-    this.score = 0;
+    this.score = 6;
     //this.explosion = new Effect(100, 100, 20, 20, 8, "Content/destroyAnim.png");
     this.effects = [];
 }
@@ -33,6 +34,7 @@ World.prototype.LoadContent = function() {
     this.tileCastleBlue.src = "Content/castleBlue.png";
     this.tileCastleOrange.src = "Content/castleOrange.png";
     this.tileDestroy.src = "Content/destroy.png";
+    this.tileSpikes.src = "Content/spikes.png";
 
     // Load unit content
     this.exampleUnit.LoadContent();
@@ -88,27 +90,18 @@ World.prototype.GenerateTileMap = function() {
     this.tileMap[this.TilePositionToTileIndex(randX, randY)] = 3;
     this.tileMap[this.TilePositionToTileIndex(randX, randY + 1)] = 2;
 
-    return;
-
-    // First five rows are sky i.e. 0
-    for (var i = 0; i < mapLength; i++) {
-        this.tileMap[i] = tileValue;
-
-        // Reset to default tile i.e. 0
-        tileValue = 0;
-
-        // Fifth row has castles on
-        if (i == rowLength * 4) tileValue = 3; // Blue castle
-        if (i == rowLength * 5 - 1) tileValue = 4; //Orange castle
-
-        // Sixth row is grass i.e. 2
-        if (i >= rowLength * 5) {
-            tileValue = 2;
-        }
-
-        // Last three rows are ground i.e. 1
-        if (i >= rowLength * 6) {
-            tileValue = 1;
+    // Harder levels
+    if (this.score > 9) {
+        // Spike on same row as castle - to left of it
+        randX = Rand(2, randX);
+        this.tileMap[this.TilePositionToTileIndex(randX, randY + 1)] = 4;
+    }
+    if (this.score > 4) {
+        for (var count = 0; count < 2; count++) {
+            // Random spikes
+            randX = Rand(2, 15);
+            randY = Rand(0, 8);
+            this.tileMap[this.TilePositionToTileIndex(randX, randY)] = 4;
         }
     }
 };
@@ -153,6 +146,7 @@ World.prototype.ApplyCollisions = function (unit) {
     var right = this.tileMap[this.PixelPositionToTileIndex(unit.x + this.tileSize, unit.y)];
     var diag = this.tileMap[this.PixelPositionToTileIndex(unit.x + this.tileSize, unit.y + this.tileSize)];
 
+    var spike = down == 4;
     var tile = (tile && tile != 3);
     var down = (down && down != 3);
     var right = (right && right != 3);
@@ -166,6 +160,10 @@ World.prototype.ApplyCollisions = function (unit) {
     // Check for game over
     if (unit.y > this.mapHeightInTiles * this.tileSize)
         this.Fail();
+    if (spike) {
+        this.Fail();
+        return;
+    }
 
     // Vertical
     if (unit.dy > 0) {
@@ -276,7 +274,7 @@ World.prototype.Draw = function (backgroundCanvasContext, foregroundCanvasContex
                     break;
                 case 4:
                     // grass00 tile
-                    tile = this.tileCastleOrange;
+                    tile = this.tileSpikes;
                     break;
                 default:
             }
