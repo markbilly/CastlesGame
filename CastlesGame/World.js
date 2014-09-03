@@ -105,8 +105,9 @@ World.prototype.GenerateTileMap = function() {
             var valid = false;
             while (!valid) {
                 randX = Rand(2, 15);
-                if (randX != castleX ||
-                    randY != castleY + 1)
+                if (!(randX == castleX &&
+                    randY == castleY + 1 &&
+                    randY == castleSpikeY))
                     valid = true;
             }
             this.tileMap[this.TilePositionToTileIndex(randX, randY)] = 4;
