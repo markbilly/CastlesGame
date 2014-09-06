@@ -10,6 +10,7 @@
     this.tileCastleOrange = new Image();
     this.tileDestroy = new Image();
     this.tileSpikes = new Image();
+    this.tileBlock = new Image();
     this.tileSize = 20;
     this.mapWidthInTiles = 16;
     this.mapHeightInTiles = 9;
@@ -19,7 +20,8 @@
     this.tileSelection = [];
     this.exampleUnit = new Unit();
     this.gravity = 10;
-    this.score = 6;
+    this.score = 0;
+    this.level = 15;
     //this.explosion = new Effect(100, 100, 20, 20, 8, "Content/destroyAnim.png");
     this.effects = [];
 }
@@ -35,6 +37,7 @@ World.prototype.LoadContent = function() {
     this.tileCastleOrange.src = "Content/castleOrange.png";
     this.tileDestroy.src = "Content/destroy.png";
     this.tileSpikes.src = "Content/spikes.png";
+    this.tileBlock.src = "Content/block.png";
 
     // Load unit content
     this.exampleUnit.LoadContent();
@@ -85,19 +88,14 @@ World.prototype.GenerateTileMap = function() {
     }
 
     // Randomise where the castle spawns
-    var castleX = Rand(5, 15);
+    var maxCastleX = 7;
+    if (Rand(0, 10) > 8) maxCastleX = 15; // less chance it's on far right
+    var castleX = Rand(5, maxCastleX);
     var castleY = Rand(0, 7);
     this.tileMap[this.TilePositionToTileIndex(castleX, castleY)] = 3;
     this.tileMap[this.TilePositionToTileIndex(castleX, castleY + 1)] = 2;
 
-    // Harder levels
-    if (this.score > 9) {
-        // Spike on same row as castle - to left of it
-        var castleSpikeX = Rand(2, castleX - 1);
-        var castleSpikeY = randY + 1;
-        this.tileMap[this.TilePositionToTileIndex(castleSpikeX, castleSpikeY)] = 4;
-    }
-    if (this.score > 4) {
+    if (this.level > 4) {
         for (var count = 0; count < 2; count++) {
             // Random spikes
             var randX = 0;
@@ -105,12 +103,30 @@ World.prototype.GenerateTileMap = function() {
             var valid = false;
             while (!valid) {
                 randX = Rand(2, 15);
-                if (randX != castleX ||
-                    randY != castleY + 1)
+                if (!(randX == castleX && randY == castleY) &&
+                    !(randX == castleX && randY == castleY + 1))
                     valid = true;
             }
             this.tileMap[this.TilePositionToTileIndex(randX, randY)] = 4;
         }
+    }
+    // Harder levels
+    if (this.level > 9) {
+        // Spike on same row as castle - to left of it
+        var castleSpikeX = Rand(2, castleX - 1);
+        var castleSpikeY = castleY + 1;
+        this.tileMap[this.TilePositionToTileIndex(castleSpikeX, castleSpikeY)] = 4;
+    }
+    if (this.level > 14 && castleY > 4) {
+        // Solid block above castle
+        var blockX = castleX;
+        var blockY = Rand(3, castleY - 1);
+        this.tileMap[this.TilePositionToTileIndex(blockX, blockY)] = 5;
+
+        // Spikes to the left
+        var blockSpikeX = castleX - 1;
+        var blockSpikeY = Rand(2, castleY);
+        this.tileMap[this.TilePositionToTileIndex(blockSpikeX, blockSpikeY)] = 4;
     }
 };
 
@@ -124,7 +140,7 @@ World.prototype.TidyTileMap = function () {
         var above = this.TilePositionToTileIndex(currentTile.x, currentTile.y - 1);
         var aboveVal = this.tileMap[above];
 
-        if (aboveVal == 2 || aboveVal == 1) this.tileMap[i] = 1;
+        if (aboveVal == 5 || aboveVal == 4 || aboveVal == 2 || aboveVal == 1) this.tileMap[i] = 1;
         if (aboveVal == 0) this.tileMap[i] = 2;
     }
 
@@ -141,7 +157,7 @@ World.prototype.Success = function () {
 
     this.GenerateTileMap();
     this.exampleUnit.Reset();
-    this.score++;
+    this.level++;
 
 };
 
@@ -284,6 +300,9 @@ World.prototype.Draw = function (backgroundCanvasContext, foregroundCanvasContex
                 case 4:
                     // grass00 tile
                     tile = this.tileSpikes;
+                    break;
+                case 5:
+                    tile = this.tileBlock;
                     break;
                 default:
             }

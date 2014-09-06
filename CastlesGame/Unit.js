@@ -26,6 +26,7 @@ Unit.prototype.Reset = function () {
     this.y = this.startY;
     //this.dx = 0;
     this.dy = 0;
+    this.dx = this.maxDx;
 };
 
 Unit.prototype.Update = function (gravity) {

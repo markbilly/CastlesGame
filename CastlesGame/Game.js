@@ -67,6 +67,7 @@ Game.prototype.TouchStart = function (touchX, touchY) {
         this.world.cursorTile != unitTile &&
         this.world.tileMap[this.world.cursorTile] != 3 &&
         this.world.tileMap[this.world.cursorTile] != 4 &&
+        this.world.tileMap[this.world.cursorTile] != 5 &&
         this.world.isCursorVisible) {
         this.world.tileSelection.push(this.world.cursorTile);
     }
@@ -96,6 +97,10 @@ Game.prototype.TouchEnd = function () {
             new Effect(x, y, this.world.tileSize, this.world.tileSize, 8, src)
             );
     }
+
+    // Add tile selection to score
+    if (this.world.tileSelection.length > 0)
+        this.world.score++;
 
     // Clear tile selection
     this.world.tileSelection = [];
